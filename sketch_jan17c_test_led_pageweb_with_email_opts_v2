@@ -1,4 +1,5 @@
 //Code tested in Wemos D1 R1
+// Its only works with STUNNEL. Without it, I cannot send email through gmail smtp servers.
 
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
