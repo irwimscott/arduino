@@ -1,0 +1,17 @@
+void setup() {
+  Serial.begin(9600);
+}
+
+    void loop(){
+      if(Serial.available()){
+        String ch;
+        ch = Serial.readString();
+        ch.trim();
+        if(ch=="on"||ch=="ON"){
+          Serial.println("LIGADO");  
+        }
+        else if(ch=="off"||ch=="OFF"){
+          Serial.println("DESLIGADO");  
+        }
+      }
+    }
