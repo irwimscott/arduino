@@ -1,0 +1,84 @@
+#include <ESP8266HTTPClient.h>
+#include <ESP8266WiFi.h>
+const int pinoSensor = 5; //PINO DIGITAL UTILIZADO PELO SENSOR
+ 
+void setup(){
+  Serial.begin(9600);
+  pinMode(pinoSensor, INPUT); //DEFINE O PINO COMO ENTRADA
+  WiFi.begin("IST", "");   //WiFi connection
+ 
+  while (WiFi.status() != WL_CONNECTED) {  //Wait for the WiFI connection completion
+ 
+    delay(500);
+    Serial.println("Waiting for connection");
+ 
+  }
+}
+
+void cofee_ready(){
+  
+  Serial.println("END:CAFE TERMINANDO DE PASSAR. AGUARDE ALGUNS SEGUNDOS E PODE IR PEGAR!");
+  
+  if(WiFi.status()== WL_CONNECTED){   //Check WiFi connection status
+      HTTPClient http;    //Declare object of class HTTPClient
+      http.begin("https://cofeemachine-543f.restdb.io", "14 13 5E 9E EF 1F DB BC EA 58 BC C6 B3 A8 E2 6D D6 28 1E 70");
+      http.addHeader("Content-Type", "application/json");
+      http.addHeader("x-apikey", "");
+      String postMessage = String('{"code":1}');
+      int httpCode = http.POST(postMessage);
+      Serial.print("http result:");
+      Serial.println(httpCode);
+      http.writeToStream(&Serial);
+      http.end();
+      delay(2000);
+   }   
+  else
+  {
+          Serial.println("Error in WiFi connection");
+          }         
+   delay(1000);
+}
+        /*  
+          http.begin("http://192.168.0.35:5000/articles/cafesaindo");   //Specify request destination
+          //http.begin("https://cofeemachine-543f.restdb.io/rest/action");
+          http.addHeader("Content-Type", "application/json");  //Specify content-type header
+          http.addHeader("x-apikey", "");  //Specify content-type header
+          http.
+          int httpCode = http.POST("Message from ESP8266");   //Send the request
+          String payload = http.getString();                  //Get the response payload
+          Serial.println(httpCode);   //Print HTTP return code
+          Serial.println(payload);    //Print request response payload
+          http.end();                 //Close connection
+          delay(2000); } 
+          else {
+          Serial.println("Error in WiFi connection"); 
+          }         
+  delay(1000);
+}
+*/
+
+void loop(){
+  
+  if(digitalRead(pinoSensor) == HIGH){ //SE A LEITURA DO PINO FOR IGUAL A HIGH, INFORMA QUE O LIQUIDO FOI DETECTADO.
+      
+      Serial.println("START:AGUA DETECTADA NO BULE - Notificando e aguardando o reservatorio baixar.");
+
+      if(WiFi.status()== WL_CONNECTED){   //Check WiFi connection status
+          HTTPClient http;    //Declare object of class HTTPClient
+          http.begin("http://192.168.0.35:5000/articles/iniciando");   //Specify request destination
+          http.addHeader("Content-Type", "text/plain");  //Specify content-type header
+          int httpCode = http.POST("Message from ESP8266");   //Send the request
+          String payload = http.getString();                  //Get the response payload
+          Serial.println(httpCode);   //Print HTTP return code
+          Serial.println(payload);    //Print request response payload
+          http.end();                 //Close connection
+          delay(2000); } else {
+          Serial.println("Error in WiFi connection");
+          }         
+          while(digitalRead(pinoSensor) == HIGH){
+              Serial.println("INFO:AGUARDANDO O RESERVATORIO BAIXAR");
+              delay(1000);
+          }
+      cofee_ready();      
+  }
+}
