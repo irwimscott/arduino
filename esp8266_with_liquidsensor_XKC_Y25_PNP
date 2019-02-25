@@ -34,7 +34,7 @@ void cofee_ready(){
           HTTPClient http;    //Declare object of class HTTPClient
           http.begin("http://192.168.0.12:5000/sensordesativado");   //Specify request destination
           http.addHeader("Content-Type", "text/plain");  //Specify content-type header
-          int httpCode = http.POST("Message from ESP8266 - SENSOR DESATIVADO - COFEE READY");   //Send the request
+          int httpCode = http.POST("Message from ESP8266 - SENSOR DESATIVADO");   //Send the request
           String payload = http.getString();                  //Get the response payload
           Serial.println(httpCode);   //Print HTTP return code
           Serial.println(payload);    //Print request response payload
