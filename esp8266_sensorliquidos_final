@@ -1,0 +1,75 @@
+#include <ESP8266HTTPClient.h>
+#include <ESP8266WiFi.h>
+//#include <WiFiClient.h>
+
+const int pinoSensor = 2; //PINO DIGITAL GPIO2 UTILIZADO PELO SENSOR ESP8266
+
+// Replace with your network credentials
+const char* ssid = "XXXXXXXX";
+const char* password = "XXXXXXXXX";
+
+void setup(){
+  Serial.begin(115200);
+  pinMode(pinoSensor, INPUT); //DEFINE O PINO COMO ENTRADA
+  WiFi.begin(ssid, password);   //WiFi connection
+ 
+  while (WiFi.status() != WL_CONNECTED) {  //Wait for the WiFI connection completion
+    
+    delay(500);
+    Serial.println("Waiting for connection");
+  }
+  
+    Serial.println("");
+    Serial.print("Connected to ");
+    Serial.println(ssid);
+    Serial.print("IP address: ");
+    Serial.println(WiFi.localIP());
+}
+
+void cofee_ready(){
+
+      Serial.println("END:NIVEL BAIXOU");
+      
+          HTTPClient http;    //Declare object of class HTTPClient
+          http.begin("https://cofeemachine-543f.restdb.io/rest/XXXXXX", "14 13 5e 9e ef 1f db bc ea 58 bc c6 b3 a8 e2 6d d6 28 1e 70");
+          http.addHeader("Content-Type", "application/json");
+          http.addHeader("x-apikey", "XXXXXXXXXXXXX");
+          String postMessage = "[{\"machine_name\": \"XXXXXXXX\", \"status\": 1}]";
+          int httpCode = http.POST(postMessage);
+          Serial.print(postMessage);
+          Serial.print("http result:");
+          Serial.println(httpCode);
+          http.writeToStream(&Serial);
+          String payload = http.getString();
+          http.end();
+          delay(1000);
+      
+}
+
+void loop(){
+  
+    if(digitalRead(pinoSensor) == HIGH){ //SE A LEITURA DO PINO FOR IGUAL A HIGH, INFORMA QUE O LIQUIDO FOI DETECTADO.
+      
+      Serial.println("START:AGUA DETECTADA - NIVEL AUMENTOU");
+          
+          HTTPClient http;    //Declare object of class HTTPClient
+          http.begin("https://cofeemachine-543f.restdb.io/rest/XXXX", "14 13 5e 9e ef 1f db bc ea 58 bc c6 b3 a8 e2 6d d6 28 1e 70");
+          http.addHeader("Content-Type", "application/json");
+          http.addHeader("x-apikey", "XXXXXXXXXXXXXXXXX");
+          String postMessage = "[{\"machine_name\": \"XXXXXXXXXXXXX\", \"status\": 0}]";
+          int httpCode = http.POST(postMessage);
+          Serial.print(postMessage);
+          Serial.print("http result:");
+          Serial.println(httpCode);
+          http.writeToStream(&Serial);
+          String payload = http.getString();
+          http.end();
+          delay(1000);
+       
+            while(digitalRead(pinoSensor) == HIGH){
+                  Serial.println("INFO:AGUARDANDO O RESERVATORIO BAIXAR");
+                  delay(1000);
+            }
+            cofee_ready(); //INVOCO A FUNCAO QUE INFORMA QUE O CAFE ESTA PRONTO.
+    }
+}
