@@ -1,0 +1,68 @@
+//Incluimos as livrarias Wire e LiquidCrystal_I2C
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+
+//Inicializamos os pinos e a direção que vamos a usar
+// Library initialization with 16x2 size settings
+LiquidCrystal_I2C lcd(0x27,16,2); // set the LCD address to 0x27
+
+int isObstaclePinA = 2; // This is our input pin
+int isObstaclePinB = 3; // This is our input pin
+int isObstacleA = HIGH; // HIGH MEANS NO OBSTACLE
+int isObstacleB = HIGH; // HIGH MEANS NO OBSTACLE
+int total = 0;
+float t1 = 0;   // Time 1
+float t2 = 0;   // Time 2
+float res = 0;  // Result
+
+void setup() {
+  // put your setup code here, to run once:
+  pinMode(isObstaclePinA, INPUT);
+  pinMode(isObstaclePinB, INPUT);
+  Serial.begin(9600);
+  Serial.println("STARTING...");
+  delay(100);
+  lcd.init();
+  lcd.backlight();
+  lcd.setCursor(0,0);
+  lcd.print("Speedometro");
+  delay(100);
+}
+
+void loop() {
+    isObstacleA = digitalRead(isObstaclePinA);
+    isObstacleB = digitalRead(isObstaclePinB);
+ 
+    // Setting time 1
+    if (isObstacleA == LOW) {
+      t1 = millis();
+    }
+ 
+    // Setting time 2
+    if (isObstacleB == LOW) {
+      t2 = millis();
+    }
+
+        //Calculate vel med
+        res = (120 / (t2 - t1)) * 3.6;
+        total = res * 100;
+        
+        if (total > 0) {
+          lcd.clear();
+          lcd.setCursor(0,1);
+          Serial.print("Speed km/h:");
+          Serial.println(total); // km/h
+          lcd.setCursor(0,0);
+          lcd.print("Speedometro");
+          String stringOne = " Km/h";
+          String totalconcatenado = total + stringOne;
+          lcd.setCursor(0,1);
+          lcd.print(totalconcatenado);
+          delay(100);
+        } else {
+          total = 0;
+          Serial.print("Speed km/h:");
+          Serial.println(total); // km/h
+          delay(100);
+        }
+}
